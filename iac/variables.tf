@@ -39,9 +39,14 @@ variable "github_token" {
   description = "The github token of your project"
 }
 
-
 variable "pypi_token" {
   type        = string
   sensitive   = true
   description = "The pypi token of your project"
+}
+
+variable "codecov_token" {
+  type        = string
+  sensitive   = true
+  description = "The codecov token of your project"
 }
