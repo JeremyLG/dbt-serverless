@@ -1,0 +1,91 @@
+name: Python package
+
+on:
+  push:
+    paths:
+      - "dbt_serverless/**.py"
+      - "dbt_project/**"
+      - ".github/workflows/python.yml"
+      - "profiles.yml"
+      - "pyproject.toml"
+      - "poetry.lock"
+
+env:
+  POETRY_VERSION: "1.2.2"
+  PYTHON_VERSION: "3.10"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]    
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Create env file"
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: projects/${{ secrets.PROJECT_ID }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@${{ secrets.PROJECT }}.iam.gserviceaccount.com
+      - name: Install poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: poetry
+      - name: Install Nox
+        run: poetry install --only nox
+      - name: Test with Nox
+        run: poetry run nox -s test-${{ matrix.python-version }}
+        continue-on-error: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+        continue-on-error: true
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        job:
+          - { nox-session: fmt_check, poetry-groups: "fmt" }
+          - { nox-session: lint, poetry-groups: "lint" }
+          - { nox-session: type_check, poetry-groups: "type_check" }
+          - { nox-session: docs, poetry-groups: "docs" }
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: poetry
+      - name: Install Nox and group dependencies
+        run: poetry install --only nox,${{ matrix.job.poetry-groups }}
+      - name: Test with Nox
+        run: poetry run nox -s ${{ matrix.job.nox-session }}
+        continue-on-error: true
+  poetry-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Validate Poetry Configuration and Lockfile Freshness
+        run: poetry lock --check

@@ -1,0 +1,26 @@
+# dbt project for testing
+.env
+credentials/
+logs/
+
+.mypy_cache
+.nox
+.pytest_cache
+dist
+build
+site
+
+__pycache__
+*.pyc
+*.egg-info
+
+.coverage
+.coverage.*
+coverage.xml
+
+# -- terraform files
+.terraform
+.terraform.lock.hcl
+terraform.tfvars*
+tfplan*
+.iac-env

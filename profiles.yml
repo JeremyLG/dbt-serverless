@@ -1,0 +1,16 @@
+config:
+  send_anonymous_usage_stats: false
+
+dbt_project:
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('PROJECT_ID') }}"
+      dataset: "{{ env_var('DBT_DATASET') }}"
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+      location: EU
+      priority: interactive
+      threads: 4
+  target: dev

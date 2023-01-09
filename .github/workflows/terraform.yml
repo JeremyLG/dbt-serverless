@@ -1,0 +1,46 @@
+name: Terraform Plan
+
+on:
+  push:
+    paths:
+      - "iac/**"
+      - ".github/workflows/terraform.yml"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    # needs: build
+
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+
+      - name: "Create env file"
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: projects/${{ secrets.PROJECT_ID }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions@${{ secrets.PROJECT }}.iam.gserviceaccount.com
+
+      - name: Terraform Version
+        id: version
+        run: make iac-version
+
+      - name: Terraform Security
+        id: security
+        run: make iac-sec
+        continue-on-error: true
+
+      - name: Terraform Plan
+        id: plan
+        run: make iac-plan
+        continue-on-error: true
