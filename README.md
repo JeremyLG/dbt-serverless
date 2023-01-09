@@ -2,6 +2,7 @@
 
 
 [![GitHub Actions][github-actions-badge]](https://github.com/JeremyLG/dbt-serverless/actions)
+[![GitHub Actions][github-actions-terraform-badge]](https://github.com/JeremyLG/dbt-serverless/actions)
 [![Packaged with Poetry][poetry-badge]](https://python-poetry.org/)
 [![Code style: black][black-badge]](https://github.com/psf/black)
 [![Imports: isort][isort-badge]](https://pycqa.github.io/isort/)
@@ -12,7 +13,8 @@
 [![Package Status](https://img.shields.io/pypi/status/dbt-serverless.svg)](https://pypi.org/project/dbt-serverless/)
 [![License](https://img.shields.io/pypi/l/dbt-serverless.svg)](https://github.com/JeremyLG/dbt-serverless/blob/main/LICENSE)
 
-[github-actions-badge]: https://github.com/JeremyLG/dbt-serverless/workflows/python/badge.svg
+[github-actions-badge]: https://github.com/JeremyLG/dbt-serverless/actions/workflows/python.yml/badge.svg
+[github-actions-terraform-badge]: https://github.com/JeremyLG/dbt-serverless/actions/workflows/terraform.yml/badge.svg
 [black-badge]: https://img.shields.io/badge/code%20style-black-000000.svg
 [isort-badge]: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
 [mypy-badge]: https://www.mypy-lang.org/static/mypy_badge.svg
