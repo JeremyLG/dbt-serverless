@@ -3,6 +3,7 @@ name: pages
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 env:
   POETRY_VERSION: "1.2.2"
