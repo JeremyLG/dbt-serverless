@@ -4,11 +4,11 @@ on:
   push:
     paths:
       - "dbt_serverless/**.py"
-      - "dbt_project/**"
       - ".github/workflows/python.yml"
-      - "profiles.yml"
       - "pyproject.toml"
       - "poetry.lock"
+      - "README.md"
+      - "LICENSE.txt"
 
 env:
   POETRY_VERSION: "1.2.2"
@@ -46,14 +46,12 @@ jobs:
         run: poetry install --only nox
       - name: Test with Nox
         run: poetry run nox -s test-${{ matrix.python-version }}
-        continue-on-error: true
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
           flags: unittests
-        continue-on-error: true
   quality:
     runs-on: ubuntu-latest
     strategy:
@@ -76,7 +74,6 @@ jobs:
         run: poetry install --only nox,${{ matrix.job.poetry-groups }}
       - name: Test with Nox
         run: poetry run nox -s ${{ matrix.job.nox-session }}
-        continue-on-error: true
   poetry-check:
     runs-on: ubuntu-latest
     steps:

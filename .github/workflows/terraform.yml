@@ -38,9 +38,7 @@ jobs:
       - name: tfsec
         id: security
         uses: aquasecurity/tfsec-action@v1.0.0
-        continue-on-error: true
 
       - name: Terraform Plan
         id: plan
         run: make iac-plan
-        continue-on-error: true

@@ -1,0 +1,28 @@
+name: Publish package
+
+on:
+  release:
+    types: [published]
+  workflow_run:
+    workflows: [Python package]
+    types: [completed]
+
+env:
+  POETRY_VERSION: "1.2.2"
+  PYTHON_VERSION: "3.10"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry==${{ env.POETRY_VERSION }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Poetry Configuration and publish
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish --build
