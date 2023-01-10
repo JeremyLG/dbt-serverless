@@ -12,6 +12,8 @@ GOOGLE_CLOUD_PROJECT=$(PROJECT_ID)
 # -- bucket definitions
 DEPLOY_BUCKET   := $(PROJECT_ID)-gcs-deploy
 
+check: poetry-lock quality test
+
 test: prepare-test poetry-test
 
 quality: prepare-quality poetry-quality
@@ -24,6 +26,9 @@ poetry-quality:
 	@poetry run nox -s lint
 	@poetry run nox -s type_check
 	@poetry run nox -s docs
+
+poetry-lock:
+	@poetry lock --check
 
 prepare-test:
 	@poetry install --only nox
