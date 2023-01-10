@@ -1,13 +1,13 @@
+import json
 import logging
 import logging.config
 from os import environ
-from subprocess import PIPE, STDOUT, Popen
-from typing import IO
 
 from fastapi import FastAPI
 import yaml
 
-from .lib.docs_helper import main as docs_helper_main
+from .lib.file_helpers import read_file, read_json_file, upload_blob, write_file
+from .lib.subprocess_helpers import execute_and_log_command
 
 app = FastAPI()
 
@@ -23,12 +23,9 @@ DOCS_COMMAND = "dbt docs generate" + DBT_COMMAND_SUFFIX
 
 @app.on_event("startup")
 async def startup_event() -> None:
-    try:
-        with open("../config/logging.yml") as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-            logging.config.dictConfig(config)
-    except FileNotFoundError:
-        logging.warning("Logging config file not found, dbt logs will not be displayed")
+    content = read_file("../config.logging.yml")
+    config = yaml.load(content, Loader=yaml.FullLoader)
+    logging.config.dictConfig(config)
 
 
 @app.get("/")
@@ -54,23 +51,26 @@ async def run(env: str = "dev") -> int:
 @app.get("/docs_serve")
 async def docs() -> str:
     execute_and_log_command(DOCS_COMMAND)
-    docs_helper_main()
+
+    logging.info("Merging files into a single one for gcs static serving")
+
+    content_index = read_file(f"{DBT_PROJECT}/target/index.html")
+    json_manifest = read_json_file(f"{DBT_PROJECT}/target/manifest.json")
+    json_catalog = read_json_file(f"{DBT_PROJECT}/target/catalog.json")
+    search_str = 'o=[i("manifest","manifest.json"+t),i("catalog","catalog.json"+t)]'
+    data = (
+        "o=[{label: 'manifest', data: "
+        + json.dumps(json_manifest)
+        + "},{label: 'catalog', data: "
+        + json.dumps(json_catalog)
+        + "}]"
+    )
+
+    data = content_index.replace(search_str, data)
+    write_file(f"{DBT_PROJECT}/target/index_merged.html", data)
+
+    logging.info("Uploading the file to GCS for static website serving")
+
+    upload_blob("dbt-static-docs-bucket", "target/index_merged.html", "index_merged.html")
+
     return "https://storage.cloud.google.com/dbt-static-docs-bucket/index_merged.html"
-
-
-def log_subprocess_output(pipe: IO[bytes]) -> None:
-    count = 0
-    for line in iter(pipe.readline, b""):  # b'\n'-separated lines
-        if count > 200:
-            break
-        logging.info(line)
-        print(line)
-        count += 1
-
-
-def execute_and_log_command(command: str) -> int:
-    process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
-    assert process.stdout is not None
-    with process.stdout:
-        log_subprocess_output(process.stdout)
-    return process.wait()

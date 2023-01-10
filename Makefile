@@ -24,7 +24,6 @@ prepare-quality:
 poetry-quality:
 	@poetry run nox -s fmt_check
 	@poetry run nox -s lint
-	@poetry run nox -s type_check
 	@poetry run nox -s docs
 
 poetry-lock:

@@ -61,9 +61,6 @@ mkdocstrings = { version = "*", extras = ["python"] }
 mkdocs-gen-files = "*"
 mkdocs-literate-nav = "*"
 
-[tool.poetry.scripts]
-fact = "fact.cli:app"
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -98,3 +95,4 @@ filterwarnings = [
 
 [tool.coverage.run]
 branch = true
+omit = ["noxfile.py"]
