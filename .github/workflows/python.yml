@@ -34,10 +34,12 @@ jobs:
           service_account: github-actions@${{ secrets.PROJECT }}.iam.gserviceaccount.com
       - name: Install poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }}
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: |
+              3.9
+              3.10
           cache: poetry
       - name: Test with Nox
         run: make test
@@ -49,15 +51,11 @@ jobs:
           flags: unittests
   quality:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        job:
-          - { nox-session: fmt_check, poetry-groups: "fmt" }
-          - { nox-session: lint, poetry-groups: "lint" }
-          - { nox-session: type_check, poetry-groups: "type_check" }
-          - { nox-session: docs, poetry-groups: "docs" }
     steps:
       - uses: actions/checkout@v3
+      - name: "Create env file"
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
       - name: Install poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }}
       - name: Set up Python
