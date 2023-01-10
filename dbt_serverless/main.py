@@ -23,9 +23,12 @@ DOCS_COMMAND = "dbt docs generate" + DBT_COMMAND_SUFFIX
 
 @app.on_event("startup")
 async def startup_event() -> None:
-    with open("config.yml") as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-        logging.config.dictConfig(config)
+    try:
+        with open("../config/logging.yml") as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+            logging.config.dictConfig(config)
+    except FileNotFoundError:
+        logging.warning("Logging config file not found, dbt logs will not be displayed")
 
 
 @app.get("/")

@@ -6,7 +6,7 @@ dbt_project:
     dev:
       type: bigquery
       method: oauth
-      project: "{{ env_var('PROJECT_ID') }}"
+      project: "{{ env_var('GOOGLE_CLOUD_PROJECT') }}"
       dataset: "{{ env_var('DBT_DATASET') }}"
       job_execution_timeout_seconds: 300
       job_retries: 1

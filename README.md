@@ -11,7 +11,7 @@
 
 [![PyPI Latest Release](https://img.shields.io/pypi/v/dbt-serverless.svg)](https://pypi.org/project/dbt-serverless/)
 [![Package Status](https://img.shields.io/pypi/status/dbt-serverless.svg)](https://pypi.org/project/dbt-serverless/)
-[![License](https://img.shields.io/pypi/l/dbt-serverless.svg)](https://github.com/JeremyLG/dbt-serverless/blob/main/LICENSE)
+[![License](https://img.shields.io/pypi/l/dbt-serverless.svg)](https://github.com/JeremyLG/dbt-serverless/blob/master/LICENSE)
 
 [github-actions-badge]: https://github.com/JeremyLG/dbt-serverless/actions/workflows/python.yml/badge.svg
 [github-actions-terraform-badge]: https://github.com/JeremyLG/dbt-serverless/actions/workflows/terraform.yml/badge.svg

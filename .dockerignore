@@ -1,0 +1,17 @@
+# Ignore everything.
+**
+
+# Except the following.
+!dbt_serverless
+!LICENSE.txt
+!pyproject.toml
+!poetry.lock
+!README.md
+
+# custom for testing
+!config
+!profiles.yml
+!dbt_project
+
+# Filter unwanted files from included folders.
+**/__pycache__

@@ -3,6 +3,7 @@ SHELL := /bin/bash
 include .env
 
 PROJECT_ID=$(PROJECT)-$(ENV)
+GOOGLE_CLOUD_PROJECT=$(PROJECT_ID)
 
 .EXPORT_ALL_VARIABLES:
 .PHONY: all test
@@ -22,6 +23,29 @@ clean-code:
 
 poetry-test:
 	@poetry run nox
+
+local-test: local-build local-run
+
+local-build:
+	@docker build --tag dbt-serverless .
+
+local-run:
+	@docker run \
+		--rm \
+		--interactive \
+		--tty \
+		-p 8080:8080 \
+		-v "$(HOME)/.config/gcloud:/gcp/config:ro" \
+		-v /gcp/config/logs \
+		--env CLOUDSDK_CONFIG=/gcp/config \
+		--env GOOGLE_APPLICATION_CREDENTIALS=/gcp/config/application_default_credentials.json \
+		--env GOOGLE_CLOUD_PROJECT=$(PROJECT_ID) \
+		--env DBT_PROJECT=$(DBT_PROJECT) \
+		--env DBT_DATASET=$(DBT_DATASET) \
+		--env DBT_PROFILES_DIR=$(DBT_PROJECT) \
+		dbt-serverless
+	@docker rmi -f $$(docker images -f "dangling=true" -q)
+	@docker volume prune -f
 
 # ---------------------------------------------------------------------------------------- #
 # This target will perform the complete setup of the current repository.
