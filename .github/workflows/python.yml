@@ -16,10 +16,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]    
+    runs-on: ubuntu-latest  
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
@@ -37,15 +34,13 @@ jobs:
           service_account: github-actions@${{ secrets.PROJECT }}.iam.gserviceaccount.com
       - name: Install poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }}
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: poetry
-      - name: Install Nox
-        run: poetry install --only nox
       - name: Test with Nox
-        run: poetry run nox -s test-${{ matrix.python-version }}
+        run: make test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
@@ -70,10 +65,8 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: poetry
-      - name: Install Nox and group dependencies
-        run: poetry install --only nox,${{ matrix.job.poetry-groups }}
-      - name: Test with Nox
-        run: poetry run nox -s ${{ matrix.job.nox-session }}
+      - name: Quality with Nox
+        run: make quality
   poetry-check:
     runs-on: ubuntu-latest
     steps:

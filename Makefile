@@ -12,17 +12,29 @@ GOOGLE_CLOUD_PROJECT=$(PROJECT_ID)
 # -- bucket definitions
 DEPLOY_BUCKET   := $(PROJECT_ID)-gcs-deploy
 
-test: prepare-test clean-code poetry-test
+test: prepare-test poetry-test
+
+quality: prepare-quality poetry-quality
+
+prepare-quality:
+	@poetry install --only nox,fmt,lint,type_check,docs
+
+poetry-quality:
+	@poetry run nox -s fmt_check
+	@poetry run nox -s lint
+	@poetry run nox -s type_check
+	@poetry run nox -s docs
 
 prepare-test:
-	@poetry install
+	@poetry install --only nox
+
+poetry-test:
+	@poetry run nox -s test-3.9
+	@poetry run nox -s test-3.10
 
 clean-code:
 	@poetry run isort .
 	@poetry run black .
-
-poetry-test:
-	@poetry run nox
 
 local-test: local-build local-run
 
