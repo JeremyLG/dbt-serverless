@@ -80,7 +80,7 @@ docker-run:
 # This target will perform the complete setup of the current repository.
 # ---------------------------------------------------------------------------------------- #
 
-all: create-project create-bucket create-artifactregistry build deploy
+all: create-project create-bucket create-artifactregistry build deploy-app
 
 build: check build-app
 deploy: deploy-app iac-clean iac-deploy
