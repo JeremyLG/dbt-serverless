@@ -12,7 +12,7 @@ GOOGLE_CLOUD_PROJECT=$(PROJECT_ID)
 # -- bucket definitions
 DEPLOY_BUCKET   := $(PROJECT_ID)-gcs-deploy
 
-check: poetry-lock clean-code quality test
+check: poetry-lock clean-code quality test docker-build
 test: prepare-test poetry-test
 
 quality: prepare-quality poetry-quality
@@ -80,10 +80,9 @@ docker-run:
 # This target will perform the complete setup of the current repository.
 # ---------------------------------------------------------------------------------------- #
 
-all: create-project create-bucket create-artifactregistry build deploy-app
+all: create-project create-bucket create-artifactregistry build deploy
 
-build: test build-app
-
+build: check build-app
 deploy: deploy-app iac-clean iac-deploy
 
 gcloud:
@@ -104,8 +103,6 @@ create-project:
 create-artifactregistry:
 	@echo "[$@] :: enabling apis..."
 	@gcloud services enable artifactregistry.googleapis.com --project $(PROJECT_ID)
-	@echo "[$@] :: letting apis activation propagate... 30secs"
-	@sleep 30
 	@echo "[$@] :: creating repository..."
 	@gcloud artifacts repositories create $(REPOSITORY_ID) \
 		--project $(PROJECT_ID) \
