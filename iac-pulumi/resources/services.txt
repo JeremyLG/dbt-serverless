@@ -1,0 +1,11 @@
+artifactregistry
+bigquery
+cloudresourcemanager
+cloudscheduler
+compute
+iam
+logging
+run
+secretmanager
+serviceusage
+workflows

@@ -4,6 +4,7 @@ import logging.config
 from os import environ
 
 from fastapi import FastAPI
+from fastapi.responses import PlainTextResponse
 import yaml
 
 from .lib.file_helpers import read_file, read_json_file, upload_blob, write_file
@@ -23,7 +24,7 @@ DOCS_COMMAND = "dbt docs generate" + DBT_COMMAND_SUFFIX
 
 @app.on_event("startup")
 async def startup_event() -> None:
-    content = read_file("../config.logging.yml")
+    content = read_file("config/logging.yml")
     config = yaml.load(content, Loader=yaml.FullLoader)
     logging.config.dictConfig(config)
 
@@ -33,24 +34,27 @@ async def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
 
-@app.get("/deps")
-async def deps() -> int:
-    return execute_and_log_command(DEPS_COMMAND)
+@app.get("/deps", response_class=PlainTextResponse)
+async def deps() -> str:
+    _, lines = await execute_and_log_command(DEPS_COMMAND)
+    return lines
 
 
-@app.get("/debug")
-async def debug() -> int:
-    return execute_and_log_command(DEBUG_COMMAND)
+@app.get("/debug", response_class=PlainTextResponse)
+async def debug() -> str:
+    _, lines = await execute_and_log_command(DEBUG_COMMAND)
+    return lines
 
 
-@app.get("/run")
-async def run(env: str = "dev") -> int:
-    return execute_and_log_command(RUN_COMMAND.format(ENV=env))
+@app.get("/run", response_class=PlainTextResponse)
+async def run(env: str = "dev") -> str:
+    _, lines = await execute_and_log_command(RUN_COMMAND.format(ENV=env))
+    return lines
 
 
 @app.get("/docs_serve")
 async def docs() -> str:
-    execute_and_log_command(DOCS_COMMAND)
+    await execute_and_log_command(DOCS_COMMAND)
 
     logging.info("Merging files into a single one for gcs static serving")
 
@@ -66,11 +70,12 @@ async def docs() -> str:
         + "}]"
     )
 
-    data = content_index.replace(search_str, data)
-    write_file(f"{DBT_PROJECT}/target/index_merged.html", data)
+    merged_content_index = content_index.replace(search_str, data)
+    merged_content_path = f"{DBT_PROJECT}/target/index_merged.html"
+    write_file(merged_content_path, merged_content_index)
 
     logging.info("Uploading the file to GCS for static website serving")
 
-    upload_blob("dbt-static-docs-bucket", "target/index_merged.html", "index_merged.html")
+    upload_blob("dbt-static-docs-bucket", merged_content_path, "index_merged.html")
 
     return "https://storage.cloud.google.com/dbt-static-docs-bucket/index_merged.html"

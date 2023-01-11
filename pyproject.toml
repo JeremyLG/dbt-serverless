@@ -19,7 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Typing :: Typed"
 ]
-packages = [{include = "dbt_serverless"}]
+packages = [{include = "dbt_serverless"}, {include = "iac-pulumi"}]
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.11"
@@ -29,6 +29,8 @@ google-cloud-storage = "^2.7.0"
 pydantic = "^1.10.4"
 PyYAML = "^6.0"
 uvicorn = "^0.20.0"
+pulumi = "3.33.1"
+pulumi-gcp = "^6.46.0"
 
 [tool.poetry.group.nox.dependencies]
 nox-poetry = "*"
@@ -37,6 +39,7 @@ nox-poetry = "*"
 pytest = "*"
 pytest-cov = "*"
 httpx = "*"
+pytest-asyncio = "^0.20.3"
 
 [tool.poetry.group.type_check.dependencies]
 mypy = "*"

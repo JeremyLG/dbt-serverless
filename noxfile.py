@@ -11,7 +11,7 @@ nox.options.sessions = ["fmt_check", "lint", "type_check", "test", "docs"]
 
 @session(python=["3.9", "3.10"])
 def test(s: Session) -> None:
-    s.install(".", "pytest", "pytest-cov", "httpx")
+    s.install(".", "pytest", "pytest-cov", "pytest-asyncio", "httpx")
     s.run(
         "python",
         "-m",

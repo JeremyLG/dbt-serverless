@@ -1,7 +1,9 @@
 name: Python package
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
     paths:
       - "dbt_serverless/**.py"
       - ".github/workflows/python.yml"
@@ -44,7 +46,7 @@ jobs:
       - name: Test with Nox
         run: make test
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml

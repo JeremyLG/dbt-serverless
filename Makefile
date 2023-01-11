@@ -6,17 +6,18 @@ PROJECT_ID=$(PROJECT)-$(ENV)
 GOOGLE_CLOUD_PROJECT=$(PROJECT_ID)
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: all test
+.PHONY: all test check quality run docker
 
 
 # -- bucket definitions
 DEPLOY_BUCKET   := $(PROJECT_ID)-gcs-deploy
 
-check: poetry-lock quality test
-
+check: poetry-lock clean-code quality test
 test: prepare-test poetry-test
 
 quality: prepare-quality poetry-quality
+run: prepare-run poetry-run
+docker: docker-build docker-run
 
 prepare-quality:
 	@poetry install --only nox,fmt,lint,type_check,docs
@@ -24,13 +25,18 @@ prepare-quality:
 poetry-quality:
 	@poetry run nox -s fmt_check
 	@poetry run nox -s lint
+	@poetry run nox -s type_check
 	@poetry run nox -s docs
 
 poetry-lock:
+	@poetry env use python3.9
+	@poetry install
 	@poetry lock --check
 
 prepare-test:
 	@poetry install --only nox
+	@rm -f .coverage*
+	@rm -f coverage.xml
 
 poetry-test:
 	@poetry run nox -s test-3.9
@@ -40,12 +46,19 @@ clean-code:
 	@poetry run isort .
 	@poetry run black .
 
-local-test: local-build local-run
+prepare-run:
+	@poetry install --only main
 
-local-build:
+poetry-run:
+	@poetry run uvicorn dbt_serverless.main:app --host 0.0.0.0 --port 8080 --reload
+
+poetry-pulumi:
+	@poetry run python -m iac-pulumi.main
+
+docker-build:
 	@docker build --tag dbt-serverless .
 
-local-run:
+docker-run:
 	@docker run \
 		--rm \
 		--interactive \
@@ -67,7 +80,7 @@ local-run:
 # This target will perform the complete setup of the current repository.
 # ---------------------------------------------------------------------------------------- #
 
-all: create-project create-bucket create-artifactregistry build deploy
+all: create-project create-bucket create-artifactregistry build deploy-app
 
 build: test build-app
 
@@ -92,7 +105,7 @@ create-artifactregistry:
 	@echo "[$@] :: enabling apis..."
 	@gcloud services enable artifactregistry.googleapis.com --project $(PROJECT_ID)
 	@echo "[$@] :: letting apis activation propagate... 30secs"
-	@timeout 30
+	@sleep 30
 	@echo "[$@] :: creating repository..."
 	@gcloud artifacts repositories create $(REPOSITORY_ID) \
 		--project $(PROJECT_ID) \
