@@ -39,6 +39,8 @@ clean-coverage:
 
 prepare-test:
 	@poetry install --only nox
+	@rm -f .coverage*
+	@rm -f coverage.xml
 
 poetry-test:
 	@poetry run nox -s test-3.9
