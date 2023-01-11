@@ -4,6 +4,7 @@ on:
   pull_request:
     types:
       - opened
+      - reopened
     paths:
       - "dbt_serverless/**.py"
       - ".github/workflows/python.yml"
