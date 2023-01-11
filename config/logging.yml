@@ -12,13 +12,6 @@ handlers:
     level: INFO
     stream: ext://sys.stdout
 
-  file:
-    class: logging.handlers.WatchedFileHandler
-    formatter: standard
-    filename: mylog.log
-    level: INFO
-
-
 loggers:
   uvicorn:
     error:
@@ -26,5 +19,5 @@ loggers:
 
 root:
   level: INFO
-  handlers: [console, file]
+  handlers: [console]
   propagate: no

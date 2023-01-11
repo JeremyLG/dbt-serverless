@@ -1,7 +1,10 @@
 name: Terraform Plan
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
+      - reopened
     paths:
       - "iac/**"
       - ".github/workflows/terraform.yml"
