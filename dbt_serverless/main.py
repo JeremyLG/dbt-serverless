@@ -1,3 +1,4 @@
+import importlib.resources as pkg_resources
 import json
 import logging
 import logging.config
@@ -7,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 import yaml
 
+from . import config as config
 from .lib.file_helpers import read_file, read_json_file, upload_blob, write_file
 from .lib.subprocess_helpers import execute_and_log_command
 
@@ -24,9 +26,10 @@ DOCS_COMMAND = "dbt docs generate" + DBT_COMMAND_SUFFIX
 
 @app.on_event("startup")
 async def startup_event() -> None:
-    content = read_file("config/logging.yml")
-    config = yaml.load(content, Loader=yaml.FullLoader)
-    logging.config.dictConfig(config)
+    content = pkg_resources.read_text(config, "logging.yml")
+    # content = read_file("config/logging.yml")
+    logger_config = yaml.load(content, Loader=yaml.FullLoader)
+    logging.config.dictConfig(logger_config)
 
 
 @app.get("/")

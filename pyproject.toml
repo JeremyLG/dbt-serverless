@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dbt-serverless"
-version = "0.1.1"
-description = "Test project PYPI publication for dbt serverless"
+version = "0.1.2"
+description = "Project to deploy dbt as a serverless application in Cloud Run"
 authors = ["JeremyLG <jeremy.le-gall@hotmail.fr>"]
 license = "MIT"
 readme = "README.md"
