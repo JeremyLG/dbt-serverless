@@ -71,7 +71,6 @@ WORKDIR ${APP_HOME}
 COPY --from=python_builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 ENV PATH "${VIRTUAL_ENV}/bin:${PATH}"
 
-COPY config ${HOME}/config
 COPY profiles.yml dbt_project dbt_project/
 
 RUN chown -R user:user ${HOME}
