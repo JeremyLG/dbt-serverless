@@ -12,7 +12,7 @@ GOOGLE_CLOUD_PROJECT=$(PROJECT_ID)
 # -- bucket definitions
 DEPLOY_BUCKET   := $(PROJECT_ID)-gcs-deploy
 
-check: poetry-lock clean-code quality test docker-build
+check: poetry-lock clean-code clean-coverage quality test poetry-build docker-build
 test: prepare-test poetry-test
 
 quality: prepare-quality poetry-quality
@@ -33,18 +33,25 @@ poetry-lock:
 	@poetry install
 	@poetry lock --check
 
-prepare-test:
-	@poetry install --only nox
+clean-coverage:
 	@rm -f .coverage*
 	@rm -f coverage.xml
 
+prepare-test:
+	@poetry install --only nox
+
 poetry-test:
 	@poetry run nox -s test-3.9
+	@rm -f .coverage*
+	@rm -f coverage.xml
 	@poetry run nox -s test-3.10
 
 clean-code:
 	@poetry run isort .
 	@poetry run black .
+
+poetry-build:
+	@poetry build
 
 prepare-run:
 	@poetry install --only main
@@ -89,6 +96,9 @@ gcloud:
 	gcloud projects add-iam-policy-binding $(PROJECT_ID) \
 		--member=user:$(ACCOUNT) \
 		--role=roles/iam.serviceAccountTokenCreator
+
+gcloud-auth:
+	@gcloud auth print-access-token --project $(PROJECT)
 
 # -- This target triggers the creation of the necessary project
 .PHONY: create-project

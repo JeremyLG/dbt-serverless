@@ -21,4 +21,65 @@
 [poetry-badge]: https://img.shields.io/badge/packaging-poetry-cyan.svg
 [codecov-badge]: https://codecov.io/github/JeremyLG/dbt-serverless/branch/master/graph/badge.svg
 
-TO DOCUMENT
+The goal of this project is to avoid the need of an Airflow server in order to schedule dbt tasks like runs, snapshots, docs...
+
+It currently encapsulate few dbt commands into a FastAPI server which can be deployed on Cloud Run in a serverless fashion. That way we reduce costs as Cloud Run is terribly cheap!
+
+You can also test it locally or through Docker without it being serverless, but it doesn't make sense as you already have the dbt CLI for this.
+
+## Usage
+
+You'll need to make use of Google ADC (Authentification Default Credentials). Meaning either :
+- gcloud cli already identified
+- or a deployment through a google product with a service account having the roles/bigquery.admin
+- or a GOOGLE_APPLICATION_CREDENTIALS env variable for a specific local keyfile 
+
+### Local deployment
+
+#### With pip
+
+```bash
+pip install dbt-serverless
+python run uvicorn dbt_serverless.main:app --host 0.0.0.0 --port 8080 --reload
+```
+
+#### With poetry
+
+```bash
+poetry add dbt-serverless
+poetry run uvicorn dbt_serverless.main:app --host 0.0.0.0 --port 8080 --reload
+```
+
+
+### Docker deployment
+Simple docker image to build dbt-serverless for local or cloud run testing (for example).
+
+```docker
+ARG build_for=linux/amd64
+
+FROM --platform=$build_for python:3.10-slim-bullseye
+
+ARG DBT_PROJECT
+ARG PROFILES_DIR
+
+WORKDIR /usr/app
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir dbt-serverless
+
+COPY ${DBT_PROJECT}/ ${PROFILES_DIR}/profiles.yml ${DBT_PROJECT}/
+
+ENTRYPOINT ["uvicorn", "dbt_serverless.main:app", "--host", "0.0.0.0", "--port", "8080"]
+```
+
+If you're not on a Google product (like Cloud Run), you will need to specify google creds at docker runtime.
+
+For example you can add these cli parameters at runtime, if you're testing and deploying it locally :
+```bash
+    -v "$(HOME)/.config/gcloud:/gcp/config:ro" \
+    -v /gcp/config/logs \
+    --env CLOUDSDK_CONFIG=/gcp/config \
+    --env GOOGLE_APPLICATION_CREDENTIALS=/gcp/config/application_default_credentials.json \
+    --env GOOGLE_CLOUD_PROJECT=$(PROJECT_ID) \
+```
+
