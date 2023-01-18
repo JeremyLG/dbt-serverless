@@ -14,6 +14,7 @@ from .lib.subprocess_helpers import execute_and_log_command
 
 app = FastAPI()
 
+PROJECT = environ.get("GOOGLE_CLOUD_PROJECT")
 DBT_PROJECT = environ.get("DBT_PROJECT")
 DBT_PROFILES_DIR = environ.get("DBT_PROFILES_DIR")
 
@@ -79,6 +80,6 @@ async def docs() -> str:
 
     logging.info("Uploading the file to GCS for static website serving")
 
-    upload_blob("dbt-static-docs-bucket", merged_content_path, "index_merged.html")
+    upload_blob(f"{PROJECT}-dbt-docs", merged_content_path, "index_merged.html")
 
     return "https://storage.cloud.google.com/dbt-static-docs-bucket/index_merged.html"
