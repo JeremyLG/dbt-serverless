@@ -52,25 +52,7 @@ poetry run uvicorn dbt_serverless.main:app --host 0.0.0.0 --port 8080 --reload
 
 
 ### Docker deployment
-Simple docker image to build dbt-serverless for local or cloud run testing (for example).
-
-```docker
-ARG build_for=linux/amd64
-
-FROM --platform=$build_for python:3.10-slim-bullseye
-
-ARG DBT_PROJECT
-ARG PROFILES_DIR
-
-WORKDIR /usr/app
-
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir dbt-serverless
-
-COPY ${DBT_PROJECT}/ ${PROFILES_DIR}/profiles.yml ${DBT_PROJECT}/
-
-ENTRYPOINT ["uvicorn", "dbt_serverless.main:app", "--host", "0.0.0.0", "--port", "8080"]
-```
+Simple docker image to build dbt-serverless for local or cloud run testing: [example Dockerfile](examples/Dockerfile.dbt).
 
 If you're not on a Google product (like Cloud Run), you will need to specify google creds at docker runtime.
 
@@ -80,6 +62,6 @@ For example you can add these cli parameters at runtime, if you're testing and d
     -v /gcp/config/logs \
     --env CLOUDSDK_CONFIG=/gcp/config \
     --env GOOGLE_APPLICATION_CREDENTIALS=/gcp/config/application_default_credentials.json \
-    --env GOOGLE_CLOUD_PROJECT=$(PROJECT_ID) \
+    --env GOOGLE_CLOUD_PROJECT=$(YOUR_PROJECT_ID) \
 ```
 
